@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/719/trunk/src/se/rupy/http
+END
+Input.java
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/623/trunk/src/se/rupy/http/Input.java
+END
+Test.java
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/389/trunk/src/se/rupy/http/Test.java
+END
+Service.java
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/608/trunk/src/se/rupy/http/Service.java
+END
+Output.java
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/719/trunk/src/se/rupy/http/Output.java
+END
+Event.java
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/719/trunk/src/se/rupy/http/Event.java
+END
+Chain.java
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/623/trunk/src/se/rupy/http/Chain.java
+END
+Hash.java
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/632/trunk/src/se/rupy/http/Hash.java
+END
+Session.java
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/623/trunk/src/se/rupy/http/Session.java
+END
+Daemon.java
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/719/trunk/src/se/rupy/http/Daemon.java
+END
+Query.java
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/657/trunk/src/se/rupy/http/Query.java
+END
+Failure.java
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/623/trunk/src/se/rupy/http/Failure.java
+END
+Worker.java
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/717/trunk/src/se/rupy/http/Worker.java
+END
+Reply.java
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/717/trunk/src/se/rupy/http/Reply.java
+END
+Deploy.java
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/673/trunk/src/se/rupy/http/Deploy.java
+END
