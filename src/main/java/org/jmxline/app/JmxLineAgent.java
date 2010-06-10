@@ -3,6 +3,11 @@ package org.jmxline.app;
 import java.lang.instrument.Instrumentation;
 import java.net.ServerSocket;
 
+import org.jmxline.app.http.GrizzlyHttp;
+import org.jmxline.app.http.TinyHTTP;
+
+import com.sun.grizzly.http.SelectorThread;
+
 public class JmxLineAgent {
 
     /**
@@ -17,11 +22,12 @@ public class JmxLineAgent {
      * jar cvfm ../../myagent.jar ../../mymanifest.mf javahowto/MyAgent.class
      */
     public static void premain(String agentArgs, Instrumentation inst) {
+        
         System.out.println("JmxLine premain called...");
         
-        instrumentation = inst;
-
-        startServer();
+//        instrumentation = inst;
+//
+//        startServer();
         
     }
     
@@ -31,13 +37,20 @@ public class JmxLineAgent {
     }
 
     private static void startServer() {
+        
+        SelectorThread st = new SelectorThread();
+        int port = 8282;
+        st.setPort(port);
+        st.setAdapter(new GrizzlyHttp());
         try {
-            ServerSocket s = new ServerSocket(8181);            
-            System.out.println("Started server on port: " + 8181);
-            for (;;) {
-                new TinyHTTP(s.accept());
-            }
+            st.initEndpoint();
+            st.startEndpoint();
         } catch (Exception e) {
+            System.out.println("Exception in SelectorThread: " + e);
+        } finally {
+            if (st.isRunning()) {
+                st.stopEndpoint();
+            }
         }
     }
 }

@@ -1,10 +1,7 @@
 package org.jmxline.app;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
 import java.util.Set;
 
 import javax.management.AttributeNotFoundException;
