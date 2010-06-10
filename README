@@ -1,3 +1,29 @@
+JMXLine
+#######
+
+JMXLine is a simple JMX command line console that can query an application in one of two ways:
+
+1. Directly by running: java -jar jmxline-app.jar localhost:8080 <jmxobjectname> <jmxattribute>
+
+* This will connect to the application running on service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi"
+* If you do not specify <jmxobjectname> it will list all JMX objects for that host
+* If you do not specify <jmxattribute> it will list all attributes for the specified <jmxobjectname>
+
+e.g. java -jar target/jmxline-app.jar localhost:8080 java.lang:type=Threading PeakThreadCount
+
+2. By sending an HTTP GET request to an instrumnted application
+
+* In order to do this you need to instrument your application by specifying -javaagent:jmxline-app.jar prior to running it
+* This will start an embedded HTTP server (https://grizzly.dev.java.net/) up with your application
+* You can then query for a particular jmx attribute value.
+
+e.g. curl -XGET localhost:8282/java.lang:type=Threading/PeakThreadCount
+
+This should return the attribute value.
+
+Other Resources
+###############
+
 Tutorial Article on JMXRemote - http://www2.java.net/article/2005/12/19/introduction-jmxremote
 Uses JDMK - http://java.sun.com/products/jdmk/
 jmxetc - http://blogs.sun.com/jmxetc/

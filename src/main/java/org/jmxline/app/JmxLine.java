@@ -53,6 +53,13 @@ public class JmxLine {
         }
 
         if (args[0] != null) {
+            
+            // Horrible, horrible
+            if (args[0].equals("server")) {
+                startServerInForeground();
+                System.exit(0);
+            }
+            
             String[] parts = args[0].split(":");
             host = parts[0];
             port = Integer.parseInt(parts[1]);
@@ -60,7 +67,8 @@ public class JmxLine {
 
         JmxLine jmxLine = new JmxLine(host, port);
 
-        if (args.length == 1) {
+        if (args.length == 1) {                       
+            
             System.out.println("No object name specified, current list for " + host + ":" + port);
             jmxLine.printNames();
         }
@@ -85,6 +93,22 @@ public class JmxLine {
                 System.out.println("+ " + args[1]);
                 System.out.println("- " + args[2] + ": " + val);
             }
+        }
+    }
+
+    private static void startServerInForeground() {
+        Runnable runnableServer = new Runnable() {
+            
+            @Override
+            public void run() {
+                JmxLineAgent.startServer();                
+            }
+        };
+        Thread serverThread = new Thread(runnableServer);
+        serverThread.setDaemon(false);
+        serverThread.start();
+        while(true) {
+            // Spin...
         }
     }
 

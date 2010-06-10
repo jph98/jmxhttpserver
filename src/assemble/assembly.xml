@@ -11,7 +11,7 @@
 			<unpack>true</unpack>
 			<scope>runtime</scope>
 			<includes>
-				<include>org.apache.maven:*:jar</include>				
+				<include>*:jar</include>				
 			</includes>
 		</dependencySet>
 	</dependencySets>

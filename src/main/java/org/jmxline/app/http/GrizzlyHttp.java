@@ -2,7 +2,6 @@ package org.jmxline.app.http;
 
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
-import java.util.Enumeration;
 
 import org.jmxline.app.JmxLine;
 
@@ -12,11 +11,13 @@ import com.sun.grizzly.tcp.OutputBuffer;
 import com.sun.grizzly.tcp.Request;
 import com.sun.grizzly.tcp.Response;
 import com.sun.grizzly.util.buf.ByteChunk;
-import com.sun.grizzly.util.http.Parameters;
 
 public class GrizzlyHttp implements Adapter {
 
-    public GrizzlyHttp() {
+    private static final int JMX_PORT = 8080;
+    private static final String JMX_HOST = "localhost";
+
+    public GrizzlyHttp() {        
     }
 
     public void service(Request request, Response response) throws Exception {
@@ -27,7 +28,7 @@ public class GrizzlyHttp implements Adapter {
         if (request.method().toString().equalsIgnoreCase("GET")) {
             response.setStatus(HttpURLConnection.HTTP_OK);
             
-            JmxLine line = new JmxLine("c1", 8080);
+            JmxLine line = new JmxLine(JMX_HOST, JMX_PORT);
             
             requestURI = requestURI.replaceFirst("/", "");
             String[] parts = requestURI.split("/");                       
@@ -69,6 +70,10 @@ public class GrizzlyHttp implements Adapter {
     public void fireAdapterEvent(String string, Object object) {
     }
 
+    /**
+     * Used for testing only...
+     * @param args
+     */
     public static void main(String[] args) {
 
         SelectorThread st = new SelectorThread();
