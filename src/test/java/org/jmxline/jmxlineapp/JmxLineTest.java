@@ -1,6 +1,7 @@
 package org.jmxline.jmxlineapp;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -20,17 +21,16 @@ public class JmxLineTest {
 
     private static final int port = 9999;
     private static final String host = "localhost";
-    private static SimpleMBeanServer testServer;
     
     @BeforeClass
     public static void setup() {
-//         testServer = new TestMBeanServer();
+//         testServer = new SimpleMBeanServer();
 //         testServer.startServices();
     }
     
     @AfterClass
     public static void teardown() {
-//         testServer = new TestMBeanServer();
+//         testServer = new SimpleMBeanServer();
 //         testServer.stopServices();
     }
     
