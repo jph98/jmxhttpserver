@@ -8,7 +8,7 @@ public class HttpServerWrapper {
 
     private static final String DEFAULT_JMX_HOST = "localhost";
     private static final int DEFAULT_JMX_PORT = 8080;
-    private static EmbeddedServer server;    
+    private static EmbeddedServer server;
 
     /**
      * Start a HTTP webserver.
@@ -19,7 +19,7 @@ public class HttpServerWrapper {
 
         startSimpleServer();
     }
-        
+
     private static void startSimpleServer() {
         try {
             server = EmbeddedServer.createInstance(8282, new HttpRequestHandler() {
@@ -28,11 +28,13 @@ public class HttpServerWrapper {
                     HttpResponse response = new HttpResponse();
 
                     // TODO: Should these be changed and passed via HTTP?
-                    String jmxHost = System.getProperty("JMX_HOST") != null ? System.getProperty("JMX_HOST"): DEFAULT_JMX_HOST;
-                    Integer jmxPort = System.getProperty("JMX_PORT") != null ? Integer.parseInt(System.getProperty("JMX_PORT")): DEFAULT_JMX_PORT;
-                    
-                    JmxLine line = new JmxLine(jmxHost, jmxPort);                   
-                    
+                    String jmxHost = System.getProperty("JMX_HOST") != null ? System.getProperty("JMX_HOST")
+                            : DEFAULT_JMX_HOST;
+                    Integer jmxPort = System.getProperty("JMX_PORT") != null ? Integer.parseInt(System
+                            .getProperty("JMX_PORT")) : DEFAULT_JMX_PORT;
+
+                    JmxLine line = new JmxLine(jmxHost, jmxPort);
+
                     url = url.replaceFirst("/", "");
                     String[] parts = url.split("/");
 
@@ -43,22 +45,18 @@ public class HttpServerWrapper {
                     }
 
                     if (parts.length == 2) {
-                        try {
-                            
-                            System.out.println("JMX Request for " + parts[0] + " attr " + parts[1]);                            
-                            responseText = line.getAttribute(parts[0], parts[1]);
-                            
-                        } catch (Exception e) {
-                            responseText = "Error getting property";
-                        }
+
+                        System.out.println("JMX Request for " + parts[0] + " attr " + parts[1]);
+                        responseText = line.getAttribute(parts[0], parts[1]);
+
                     }
 
                     response.addContent(responseText);
                     response.setOk();
                     return response;
                 }
-            });                                             
-            
+            });
+
         } catch (Exception e) {
             System.err.println("Exception " + e);
         }
@@ -66,5 +64,5 @@ public class HttpServerWrapper {
 
     public static EmbeddedServer getServer() {
         return server;
-    }   
+    }
 }

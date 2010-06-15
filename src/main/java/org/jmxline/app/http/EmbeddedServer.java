@@ -107,6 +107,9 @@ public class EmbeddedServer {
             Thread thread = new Thread(new RequestHandler(clientRequestSocket), "ClientRequest-" + clientHost);
             thread.start();
         }
+        
+        System.out.println("exiing accept thread");
+        
     }
 
     /**

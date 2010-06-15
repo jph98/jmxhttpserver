@@ -9,7 +9,6 @@ import javax.management.IntrospectionException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
-import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
@@ -22,72 +21,91 @@ import org.jmxline.app.http.HttpServerWrapper;
 
 public class JmxLine {
 
-    private MBeanServerConnection mbs;   
+    private String host;
+    private int port;
 
     /**
      * JMXLine constructor.
      * 
-     * @param host is the JMX server hostname 
-     * @param port is the JMX server port number
+     * @param host
+     *            is the JMX server hostname
+     * @param port
+     *            is the JMX server port number
      */
     public JmxLine(String host, int port) {
 
+        this.host = host;
+        this.port = port;
+    }
+
+    private JMXConnector getConnection() {
+        JMXConnector connector = null;
+
         try {
-            JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi");                           
-            JMXConnector connector = JMXConnectorFactory.connect(serviceURL, null);
-            mbs = connector.getMBeanServerConnection();
+            JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port
+                    + "/jmxrmi");
+            connector = JMXConnectorFactory.connect(serviceURL, null);
+            return connector;
         } catch (IOException e) {
             System.out.println("Could not connect via JMX " + host + ":" + port + "\n" + e);
         }
-    }
-    
-    public boolean isConnected() {
-        return mbs != null;
+        return null;
     }
 
     /**
      * Start a webserver up to interpret HTTP requests.
      */
     private static void startStandloneServer() {
-        
+
         HttpServerWrapper.startServer();
-        
+       
+    }
+
+    public void getCount() {
+        JMXConnector connector = getConnection();        
         try {
-            System.out.println("zzz...");
-            Thread.sleep(Integer.MAX_VALUE);            
-        } catch (InterruptedException e) {
+            Integer count = connector.getMBeanServerConnection().getMBeanCount();
+            System.out.println("Count: " + count);
+        } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection(connector);
         }
-            
     }
 
-    public void getCount() throws IOException {
-        Integer count = mbs.getMBeanCount();
-        System.out.println("Count: " + count);
-    }
-
-    public void getDomains() throws IOException {
-        String[] domains = mbs.getDomains();
-        for (String domain : domains) {
-            System.out.println("Domain " + domain);
+    public void getDomains() {
+        JMXConnector connector = getConnection();
+        try {
+            String[] domains = connector.getMBeanServerConnection().getDomains();
+            for (String domain : domains) {
+                System.out.println("Domain " + domain);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection(connector);
         }
     }
 
     public void printNames() {
+        JMXConnector connector = getConnection();
         Set<ObjectInstance> beans;
         try {
-            beans = mbs.queryMBeans(null, null);
+            beans = connector.getMBeanServerConnection().queryMBeans(null, null);
 
             for (ObjectInstance instance : beans) {
                 System.out.println(" + " + instance.getObjectName());
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection(connector);
         }
     }
 
     public String nameExists(String name) {
 
+        JMXConnector connector = getConnection();
         ObjectName oName = null;
         if (name != null) {
             oName = createJmxObject(name);
@@ -95,7 +113,7 @@ public class JmxLine {
 
         Set<ObjectInstance> beans;
         try {
-            beans = mbs.queryMBeans(oName, null);
+            beans = connector.getMBeanServerConnection().queryMBeans(oName, null);
 
             for (ObjectInstance instance : beans) {
                 return instance.getObjectName().toString();
@@ -103,19 +121,31 @@ public class JmxLine {
 
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection(connector);
         }
 
         return null;
     }
 
+    private void closeConnection(JMXConnector connector) {
+        try {
+            connector.close();
+        } catch (IOException e) {
+            System.out.println("Could not close connection.");
+            e.printStackTrace();
+        }
+    }
+
     public void printAttributes(String name) {
+        JMXConnector connector = getConnection();
         ObjectName oName = null;
         if (name != null) {
             oName = createJmxObject(name);
         }
 
         try {
-            MBeanInfo info = mbs.getMBeanInfo(oName);
+            MBeanInfo info = connector.getMBeanServerConnection().getMBeanInfo(oName);
             for (MBeanAttributeInfo att : info.getAttributes()) {
                 System.out.println(" - " + att.getName() + " [" + att.getType() + "] " + att.getDescription());
             }
@@ -128,12 +158,17 @@ public class JmxLine {
             e.printStackTrace();
         } catch (IntrospectionException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection(connector);
         }
     }
 
     public String getAttribute(String name, String attribute) {
+        JMXConnector connector = getConnection();
         try {
-            return mbs.getAttribute(createJmxObject(name), attribute).toString();
+            ObjectName obj = createJmxObject(name);
+            return connector.getMBeanServerConnection().getAttribute(obj, attribute).toString();
+
         } catch (InstanceNotFoundException e) {
             e.printStackTrace();
         } catch (ReflectionException e) {
@@ -144,6 +179,8 @@ public class JmxLine {
             e.printStackTrace();
         } catch (MBeanException e) {
             e.printStackTrace();
+        } finally {
+            closeConnection(connector);
         }
 
         return null;
@@ -168,8 +205,8 @@ public class JmxLine {
     }
 
     /**
-     * Main.
-     * Change this to use Commons-CLI.
+     * Main. Change this to use Commons-CLI.
+     * 
      * @param args
      */
     public static void main(String[] args) {
@@ -184,7 +221,6 @@ public class JmxLine {
 
         if (args[0] != null) {
 
-            // Horrible, horrible
             if (args[0].equals("standalone")) {
                 startStandloneServer();
                 System.exit(0);
@@ -198,33 +234,30 @@ public class JmxLine {
 
         JmxLine jmxLine = new JmxLine(host, port);
 
-        if (jmxLine.isConnected()) {
-            
-            if (args.length == 1) {
-                System.out.println("No object name specified, current list for " + host + ":" + port);
-                jmxLine.printNames();
-            }
-    
-            if (args.length == 2) {
-                // No attribute specified, print all
-                System.out.println("No attribute specified, current attributes for " + host + ":" + port + " and "
-                        + args[1]);
+        if (args.length == 1) {
+            System.out.println("No object name specified, current list for " + host + ":" + port);
+            jmxLine.printNames();
+        }
+
+        if (args.length == 2) {
+            // No attribute specified, print all
+            System.out.println("No attribute specified, current attributes for " + host + ":" + port + " and "
+                    + args[1]);
+            jmxLine.printAttributes(args[1]);
+        }
+
+        if (args.length == 3) {
+
+            if (args[1] != null && args[2] == null) {
+                System.out.println("No attribute specified, current names for" + host + ":" + port);
                 jmxLine.printAttributes(args[1]);
             }
-    
-            if (args.length == 3) {
-    
-                if (args[1] != null && args[2] == null) {
-                    System.out.println("No attribute specified, current names for" + host + ":" + port);
-                    jmxLine.printAttributes(args[1]);
-                }
-    
-                // get value of attribute
-                if (args[1] != null && args[2] != null) {
-                    String val = jmxLine.getAttribute(args[1], args[2]);
-                    System.out.println("+ " + args[1]);
-                    System.out.println("- " + args[2] + ": " + val);
-                }
+
+            // get value of attribute
+            if (args[1] != null && args[2] != null) {
+                String val = jmxLine.getAttribute(args[1], args[2]);
+                System.out.println("+ " + args[1]);
+                System.out.println("- " + args[2] + ": " + val);
             }
         }
     }
