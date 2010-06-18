@@ -19,12 +19,14 @@ import org.junit.Test;
  */
 public class JmxLineTest {
 
-    private static final int port = 9999;
+    private static final int port = 8080;
     private static final String host = "localhost";
+    private static SimpleMBeanServer testServer = null;
     
     @BeforeClass
     public static void setup() {
 //         testServer = new SimpleMBeanServer();
+//         testServer.createServer();
 //         testServer.startServices();
     }
     
@@ -36,16 +38,23 @@ public class JmxLineTest {
     
     @Ignore
     @Test
+    public void testConnection() {
+    	JmxLine line = new JmxLine(host, port);
+    	assertNotNull("Connection should not be null", line.getJmxConnection());
+    }
+    
+    @Ignore
+    @Test
     public void retrieveAllNames() {
         JmxLine line = new JmxLine(host, port);
         line.printNames();
     }
-
+    
     @Ignore
     @Test
     public void retrieveName() {
-        JmxLine line = new JmxLine(host, 8080);
-        String name = "system:name=http";
+        JmxLine line = new JmxLine(host, port);
+        String name = "system:name=testmbean";
         String eName = line.nameExists(name);
         assertEquals(name, eName);
     }
@@ -53,7 +62,7 @@ public class JmxLineTest {
     @Ignore
     @Test
     public void retrieveAllAtts() {
-        JmxLine line = new JmxLine(host, 8080);
+        JmxLine line = new JmxLine(host, port);
         String name = "org.apache.cassandra.db:type=Caches,keyspace=MessageArchiver,cache=metaRowCache";
         System.out.println("+ " + name);
         line.printAttributes(name);
@@ -62,7 +71,7 @@ public class JmxLineTest {
     @Ignore
     @Test
     public void retrieveAtt() {
-        JmxLine line = new JmxLine(host, 8080);
+        JmxLine line = new JmxLine(host, port);
         String name = "org.apache.cassandra.db:type=Caches,keyspace=MessageArchiver,cache=metaRowCache";
         String attribute = "Size";
         System.out.println("+ " + name);

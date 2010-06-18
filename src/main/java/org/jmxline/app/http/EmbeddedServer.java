@@ -23,11 +23,16 @@ import java.util.StringTokenizer;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Ultra lightweight web server for embedding in applications.
  * Originally adapted from VQEmbWeb (http://www.croninsolutions.com/vqembweb/) 
  */
 public class EmbeddedServer {
+
+	private final static Logger logger = LoggerFactory.getLogger(EmbeddedServer.class);
 
     /**
      * Port to serve clients on
@@ -94,7 +99,7 @@ public class EmbeddedServer {
             serverSocket = new ServerSocket(this.serverPort);
         }
         
-        System.out.println("Server up on " + InetAddress.getLocalHost().getHostName() + ":" + this.serverPort);
+        logger.info("Server up on " + InetAddress.getLocalHost().getHostName() + ":" + this.serverPort);
         
         // 
         while (alive) {
@@ -108,7 +113,7 @@ public class EmbeddedServer {
             thread.start();
         }
         
-        System.out.println("exiing accept thread");
+        logger.debug("exiing accept thread");
         
     }
 

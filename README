@@ -1,7 +1,9 @@
 JMXLine
 #######
 
-JMXLine is a simple JMX command line console that can query an application in one of two ways:
+JMXLine functions as:
+ a) JMX command line console that can query an application via RMI
+ b) simple web server that can be run standalone (or embedded as an agent in an application)
 
 Building
 ########
@@ -9,11 +11,15 @@ Building
 To build the agent, command line tool and standalone server use:
 
  mvn assembly:assembly
+ 
+To setup for development with eclipse:
+
+ mvn eclipse:eclipse
 
 Setup
 #####
 
-1. INTERACTIVE MODE - will connect directly to the server via a JMXConnection
+1. COMMAND LINE MODE - will connect directly to the server via a JMXConnection
 
  java -jar jmxline-app.jar localhost:8080 <jmxobjectname> <jmxattribute>
 
@@ -22,6 +28,7 @@ Setup
 * If you do not specify <jmxattribute> it will list all attributes for the specified <jmxobjectname>
 
 e.g. java -jar target/jmxline-app.jar localhost:8080 java.lang:type=Threading PeakThreadCount
+
 
 2. EMBEDDED AGENT MODE - By embedding jmxline-app.jar as an agent in a running application on the host machine.  You can then send HTTP GET requests for JMX attributes to the application.
 
@@ -33,7 +40,8 @@ This will start an embedded HTTP server (https://grizzly.dev.java.net/) up with 
 
  curl -XGET localhost:8282/java.lang:type=Threading/PeakThreadCount
 
-3. STANDALONE PROCESS MODE - You can start jmxline-app.jar up as a standalone web server on the host machine.
+
+3. STANDALONE WEBSERVER MODE - You can start jmxline-app.jar up as a standalone web server on the host machine.
 
  java -jar jmxline-app.jar standalone
 
@@ -65,10 +73,3 @@ This should poll the web server on the host machine which will return the attrib
 TODO
 ####
 
-* Yet Another Java Service Wrapper - http://sourceforge.net/projects/yajsw/
-* Java Service Wrapper - http://sourceforge.net/projects/wrapper/
-* Service Wrapper - http://wrapper.tanukisoftware.org/doc/english/download.jsp
-* Apache Commons Daemon - http://commons.apache.org/daemon/
-* Akuma - https://akuma.dev.java.net/
-* JavaService - http://javaservice.ow2.org/js_doc_frame.html
-* DaemonTools - http://cr.yp.to/daemontools.html

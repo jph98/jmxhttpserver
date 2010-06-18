@@ -3,15 +3,19 @@ package org.jmxline.app;
 import java.lang.instrument.Instrumentation;
 
 import org.jmxline.app.http.HttpServerWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JmxLineAgent {
-    
+  
+	private final static Logger logger = LoggerFactory.getLogger(JmxLineAgent.class);
+
     /**
      * Premain-Class for agent.
      */
     public static void premain(String agentArgs, Instrumentation inst) {
 
-        System.out.println("JmxLine premain called...");
+        logger.info("JmxLine premain called...");
         Runnable runnableServer = new Runnable() {
 
             @Override
@@ -31,7 +35,7 @@ public class JmxLineAgent {
      * @param args
      */
     public static void main(String[] args) {
-        System.out.println("JmxLine main called...");
+        logger.info("JmxLine main called...");
         Runnable runnableServer = new Runnable() {
 
             @Override

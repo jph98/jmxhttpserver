@@ -18,9 +18,16 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 import org.jmxline.app.http.HttpServerWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Main JMXLine class.
+ */
 public class JmxLine {
 
+	private final static Logger logger = LoggerFactory.getLogger(JmxLine.class);
+	  
     private String host;
     private int port;
 
@@ -42,12 +49,15 @@ public class JmxLine {
         JMXConnector connector = null;
 
         try {
-            JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port
-                    + "/jmxrmi");
+            JMXServiceURL serviceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" 
+            											 + host + ":" 
+            											 + port
+                                                         + "/jmxrmi");
+            
             connector = JMXConnectorFactory.connect(serviceURL, null);
             return connector;
         } catch (IOException e) {
-            System.out.println("Could not connect via JMX " + host + ":" + port + "\n" + e);
+            logger.error("Could not connect via JMX " + host + ":" + port + "\n" + e);
         }
         return null;
     }
@@ -58,16 +68,25 @@ public class JmxLine {
     private static void startStandloneServer() {
 
         HttpServerWrapper.startServer();
+        
+        try {
+			Thread.sleep(Integer.MAX_VALUE);
+		} catch (InterruptedException e) {
+		}
        
+    }
+    
+    public JMXConnector getJmxConnection() {
+        return getConnection();
     }
 
     public void getCount() {
         JMXConnector connector = getConnection();        
         try {
             Integer count = connector.getMBeanServerConnection().getMBeanCount();
-            System.out.println("Count: " + count);
+            logger.info("Count: " + count);
         } catch (IOException e) {
-            e.printStackTrace();
+        	logger.error("IOExcepton ", e);
         } finally {
             closeConnection(connector);
         }
@@ -78,10 +97,10 @@ public class JmxLine {
         try {
             String[] domains = connector.getMBeanServerConnection().getDomains();
             for (String domain : domains) {
-                System.out.println("Domain " + domain);
+                logger.info("Domain " + domain);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+        	logger.error("IOExcepton ", e);
         } finally {
             closeConnection(connector);
         }
@@ -94,10 +113,10 @@ public class JmxLine {
             beans = connector.getMBeanServerConnection().queryMBeans(null, null);
 
             for (ObjectInstance instance : beans) {
-                System.out.println(" + " + instance.getObjectName());
+                logger.info(" + " + instance.getObjectName());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("IOExcepton ", e);
         } finally {
             closeConnection(connector);
         }
@@ -120,7 +139,7 @@ public class JmxLine {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+        	logger.error("IOExcepton ", e);
         } finally {
             closeConnection(connector);
         }
@@ -132,8 +151,7 @@ public class JmxLine {
         try {
             connector.close();
         } catch (IOException e) {
-            System.out.println("Could not close connection.");
-            e.printStackTrace();
+            logger.info("Could not close connection.");
         }
     }
 
@@ -147,17 +165,17 @@ public class JmxLine {
         try {
             MBeanInfo info = connector.getMBeanServerConnection().getMBeanInfo(oName);
             for (MBeanAttributeInfo att : info.getAttributes()) {
-                System.out.println(" - " + att.getName() + " [" + att.getType() + "] " + att.getDescription());
+                logger.info(" - " + att.getName() + " [" + att.getType() + "] " + att.getDescription());
             }
 
         } catch (ReflectionException e) {
-            e.printStackTrace();
+        	logger.error("ReflectionException ", e);
         } catch (IOException e) {
-            e.printStackTrace();
+        	logger.error("IOExcepton ", e);
         } catch (InstanceNotFoundException e) {
-            e.printStackTrace();
+        	logger.error("InstanceNotFoundException ", e);
         } catch (IntrospectionException e) {
-            e.printStackTrace();
+        	logger.error("IntrospectionException ", e);
         } finally {
             closeConnection(connector);
         }
@@ -170,15 +188,15 @@ public class JmxLine {
             return connector.getMBeanServerConnection().getAttribute(obj, attribute).toString();
 
         } catch (InstanceNotFoundException e) {
-            e.printStackTrace();
+        	logger.error("InstanceNotFoundException ", e);
         } catch (ReflectionException e) {
-            e.printStackTrace();
+        	logger.error("ReflectionException ", e);
         } catch (IOException e) {
-            e.printStackTrace();
+        	logger.error("IOException ", e);
         } catch (AttributeNotFoundException e) {
-            e.printStackTrace();
+        	logger.error("AttributeNotFoundException ", e);
         } catch (MBeanException e) {
-            e.printStackTrace();
+        	logger.error("MBeanException ", e);
         } finally {
             closeConnection(connector);
         }
@@ -191,16 +209,14 @@ public class JmxLine {
         try {
             oName = new ObjectName(aName);
         } catch (MalformedObjectNameException e) {
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
+        	logger.error("MalformedObjectNameException ", e);
+        } 
         return oName;
     }
 
     private static void usage() {
-        System.out
-                .println("Usage: java -jar jmxline-app.jar <hostname>:<port> \nor... java -jar jmxline-app.jar standalone");
+        logger.info("Usage: java -jar jmxline-app.jar <hostname>:<port> \n" +
+        		    "or... java -jar jmxline-app.jar standalone");
         System.exit(-1);
     }
 
@@ -235,13 +251,13 @@ public class JmxLine {
         JmxLine jmxLine = new JmxLine(host, port);
 
         if (args.length == 1) {
-            System.out.println("No object name specified, current list for " + host + ":" + port);
+            logger.info("No object name specified, current list for " + host + ":" + port);
             jmxLine.printNames();
         }
 
         if (args.length == 2) {
             // No attribute specified, print all
-            System.out.println("No attribute specified, current attributes for " + host + ":" + port + " and "
+            logger.info("No attribute specified, current attributes for " + host + ":" + port + " and "
                     + args[1]);
             jmxLine.printAttributes(args[1]);
         }
@@ -249,15 +265,15 @@ public class JmxLine {
         if (args.length == 3) {
 
             if (args[1] != null && args[2] == null) {
-                System.out.println("No attribute specified, current names for" + host + ":" + port);
+                logger.info("No attribute specified, current names for" + host + ":" + port);
                 jmxLine.printAttributes(args[1]);
             }
 
             // get value of attribute
             if (args[1] != null && args[2] != null) {
                 String val = jmxLine.getAttribute(args[1], args[2]);
-                System.out.println("+ " + args[1]);
-                System.out.println("- " + args[2] + ": " + val);
+                logger.info("- " + args[2] + ": " + val);
+                logger.info("+ " + args[1]);
             }
         }
     }

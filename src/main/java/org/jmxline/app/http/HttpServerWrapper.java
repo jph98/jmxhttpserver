@@ -3,9 +3,12 @@ package org.jmxline.app.http;
 import java.util.Map;
 
 import org.jmxline.app.JmxLine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpServerWrapper {
 
+	private static final Logger logger = LoggerFactory.getLogger(HttpServerWrapper.class);
     private static final String DEFAULT_JMX_HOST = "localhost";
     private static final int DEFAULT_JMX_PORT = 8080;
     private static EmbeddedServer server;
@@ -41,14 +44,12 @@ public class HttpServerWrapper {
                     String responseText = null;
 
                     if (parts.length < 2) {
-                        responseText = "No attribute name specified";
+                        responseText = "JMXLine: No JMX bean or attribute name specified, e.g http://localhost:8080/java.lang:type=Threading/PeakThreadCount";
                     }
-
+                    
                     if (parts.length == 2) {
-
                         System.out.println("JMX Request for " + parts[0] + " attr " + parts[1]);
                         responseText = line.getAttribute(parts[0], parts[1]);
-
                     }
 
                     response.addContent(responseText);
@@ -58,7 +59,7 @@ public class HttpServerWrapper {
             });
 
         } catch (Exception e) {
-            System.err.println("Exception " + e);
+            logger.error("Exception " + e);
         }
     }
 
