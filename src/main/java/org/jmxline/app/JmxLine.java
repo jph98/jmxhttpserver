@@ -1,6 +1,8 @@
 package org.jmxline.app;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.management.AttributeNotFoundException;
@@ -107,19 +109,27 @@ public class JmxLine {
     }
 
     public void printNames() {
+        for (String name: getNameList()) {
+            logger.info(name);
+        }
+    }
+    
+    public List<String> getNameList() {
+        List<String> names = new ArrayList<String>();
         JMXConnector connector = getConnection();
         Set<ObjectInstance> beans;
         try {
             beans = connector.getMBeanServerConnection().queryMBeans(null, null);
 
             for (ObjectInstance instance : beans) {
-                logger.info(" + " + instance.getObjectName());
+                names.add(instance.getObjectName().toString());                
             }
         } catch (IOException e) {
             logger.error("IOExcepton ", e);
         } finally {
             closeConnection(connector);
         }
+        return names;
     }
 
     public String nameExists(String name) {
@@ -156,6 +166,13 @@ public class JmxLine {
     }
 
     public void printAttributes(String name) {
+        for (String attribute: getAttributeList(name)) {
+            logger.info(attribute);
+        }
+    }
+    
+    public List<String> getAttributeList(String name) {
+        List<String> attributes = new ArrayList<String>();
         JMXConnector connector = getConnection();
         ObjectName oName = null;
         if (name != null) {
@@ -165,20 +182,21 @@ public class JmxLine {
         try {
             MBeanInfo info = connector.getMBeanServerConnection().getMBeanInfo(oName);
             for (MBeanAttributeInfo att : info.getAttributes()) {
-                logger.info(" - " + att.getName() + " [" + att.getType() + "] " + att.getDescription());
+                attributes.add(" - " + att.getName() + " [" + att.getType() + "] " + att.getDescription());                
             }
 
         } catch (ReflectionException e) {
-        	logger.error("ReflectionException ", e);
+            logger.error("ReflectionException ", e);
         } catch (IOException e) {
-        	logger.error("IOExcepton ", e);
+            logger.error("IOExcepton ", e);
         } catch (InstanceNotFoundException e) {
-        	logger.error("InstanceNotFoundException ", e);
+            logger.error("InstanceNotFoundException ", e);
         } catch (IntrospectionException e) {
-        	logger.error("IntrospectionException ", e);
+            logger.error("IntrospectionException ", e);
         } finally {
             closeConnection(connector);
         }
+        return attributes;
     }
 
     public String getAttribute(String name, String attribute) {
@@ -250,6 +268,7 @@ public class JmxLine {
 
         JmxLine jmxLine = new JmxLine(host, port);
 
+        // TODO: Change to commons-cli
         if (args.length == 1) {
             logger.info("No object name specified, current list for " + host + ":" + port);
             jmxLine.printNames();
