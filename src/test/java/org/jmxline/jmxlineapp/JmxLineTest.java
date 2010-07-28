@@ -2,7 +2,8 @@ package org.jmxline.jmxlineapp;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -67,14 +68,27 @@ public class JmxLineTest {
         } catch (NotCompliantMBeanException e) {
             logger.error("NotCompliantMBeanException",e);
         }
-    }   
+    }
+    
+    @Test
+    public void testCreateJmxObject() {
+        JmxLine line = new JmxLine(host, port, null);
+        
+        String name = "java.lang:type=Threading/ThreadCount";
+        ObjectName oName = line.createJmxObject(name);
+        assertThat(name + " should not be null", oName, is(not(nullValue())));
+        
+        name = "java.lang:type=GarbageCollector,name=ParNew/CollectionTime";
+        oName = line.createJmxObject(name);
+        assertThat(name + " should not be null", oName, is(not(nullValue())));               
+    }
 
     @Test
     public void testConnection() {
         JmxLine line = new JmxLine(host, port, null);
         assertNotNull("Connection should not be null", line.getJmxConnection());
-    }
-
+    }  
+    
     @Test
     public void testDebugNames() {
         JmxLine line = new JmxLine(host, port);

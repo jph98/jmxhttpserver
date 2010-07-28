@@ -11,10 +11,16 @@ import javax.management.IntrospectionException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularType;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -63,8 +69,8 @@ public class JmxLine {
                     + nameToUse);
 
             logger.info("Created server with service URL: " + serviceURL);
-            
-            return JMXConnectorFactory.connect(serviceURL, null);            
+
+            return JMXConnectorFactory.connect(serviceURL, null);
 
         } catch (IOException e) {
             logger.error("Could not connect via JMX " + host + ":" + port + "\n" + e);
@@ -167,7 +173,9 @@ public class JmxLine {
 
     private void closeConnection(JMXConnector connector) {
         try {
-            connector.close();
+            if (connector != null) {
+                connector.close();
+            }
         } catch (IOException e) {
             try {
                 logger.info("Could not close connection " + connector.getConnectionId());
@@ -212,29 +220,69 @@ public class JmxLine {
     }
 
     public String getAttribute(String name, String attribute) {
+        
         JMXConnector connector = getConnection();
-        try {
-            ObjectName obj = createJmxObject(name);
-            return connector.getMBeanServerConnection().getAttribute(obj, attribute).toString();
-
-        } catch (InstanceNotFoundException e) {
-            logger.error("InstanceNotFoundException ", e);
-        } catch (ReflectionException e) {
-            logger.error("ReflectionException ", e);
-        } catch (IOException e) {
-            logger.error("IOException ", e);
-        } catch (AttributeNotFoundException e) {
-            logger.error("AttributeNotFoundException ", e);
-        } catch (MBeanException e) {
-            logger.error("MBeanException ", e);
-        } finally {
-            closeConnection(connector);
+        
+        if (connector != null) {
+            String[] parts;
+            String subAttribute = new String();
+            
+            if (attribute.contains(".")) {
+                parts = attribute.split("\\.");
+                if (parts.length == 2) {            
+                    attribute = parts[0];
+                    subAttribute = parts[1];
+                }
+            }
+            
+            try {
+                
+                ObjectName obj = createJmxObject(name);
+                MBeanServerConnection connection = connector.getMBeanServerConnection();
+               
+                    Object attr = connection.getAttribute(obj, attribute);
+                    
+                    if (attr instanceof SimpleType<?>) {
+                        return attr.toString();
+                    } else if (attr instanceof CompositeDataSupport) {
+                        CompositeDataSupport compDataSupport = (CompositeDataSupport) attr;
+                        
+                        if (subAttribute != "" && compDataSupport.containsKey(subAttribute)) {
+                            return compDataSupport.get(subAttribute).toString();
+                        } else {
+                            return "Could not find composite attribute: " + compDataSupport.toString();
+                        }
+                    } else if (attr instanceof TabularType) {
+                        return "TabularType not supported yet";
+                    } else if (attr instanceof ArrayType<?>) {
+                        return "ArrayType not supported yet";
+                    }     
+                
+                
+                return "Not supported yet";
+    
+            } catch (InstanceNotFoundException e) {
+                logger.error("InstanceNotFoundException ", e);
+            } catch (ReflectionException e) {
+                logger.error("ReflectionException ", e);
+            } catch (IOException e) {
+                logger.error("IOException ", e);
+            } catch (AttributeNotFoundException e) {
+                logger.error("AttributeNotFoundException ", e);
+            } catch (MBeanException e) {
+                logger.error("MBeanException ", e);
+            } finally {
+                closeConnection(connector);
+            }
+        } else {
+            return "Could not create connection to host";
         }
-
-        return null;
+        
+        return "Not supported yet";
     }
-
-    private ObjectName createJmxObject(String aName) {
+        
+    // visible for testing
+    public ObjectName createJmxObject(String aName) {
         ObjectName oName = null;
         try {
             oName = new ObjectName(aName);

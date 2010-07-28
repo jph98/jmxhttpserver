@@ -66,4 +66,8 @@ public class HttpServerWrapper {
     public static EmbeddedServer getServer() {
         return server;
     }
+    
+    public static void main(String[] args) {
+        new HttpServerWrapper().startServer();
+    }
 }
