@@ -36,7 +36,7 @@ Instrument your application with:
 
  -javaagent:jmxline-app.jar
 
-This will start an embedded HTTP server (https://grizzly.dev.java.net/) up with your application. You can then query for a particular jmx attribute value:
+This will start an embedded HTTP server up with your application. You can then query for a particular jmx attribute value:
 
  curl -XGET localhost:8282/java.lang:type=Threading/PeakThreadCount
 
