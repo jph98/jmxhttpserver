@@ -1,9 +1,9 @@
-JMXLine
-=======
+JMX HTTP Server
+===============
 
-JMXLine functions as:
+This project provides a:
  a) JMX command line console that can query an application via RMI
- b) simple web server that can be run standalone (or embedded as an agent in an application)
+ b) Simple web server that can be run standalone (or embedded as an agent in an application)
 
 Building
 --------
